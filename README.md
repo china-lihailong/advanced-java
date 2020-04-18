@@ -127,7 +127,7 @@
 - [微服务治理策略](/docs/micro-services/huifer-micro-service-governance.md)
 - Eureka 和 Zookeeper 都可以提供服务注册与发现的功能，它们有什么区别？
 - ......
-### [知道ThreadLocal嘛？谈谈你对它的理解？](https://github.com/china-lihailong/advanced-java/commit/5d9fad806104dfe02733b3006b30cf843ede55fb)
+### [知道ThreadLocal嘛？谈谈你对它的理解？](docs/jdk-basis/basis-threadLocal.md)
 1、ThreadLocal是什么
 2、ThreadLocal怎么用
 3、ThreadLocal源码分析
