@@ -6,13 +6,13 @@ ThreadLocal是怎么实现的呢？
 ThreadLocal又有哪些误区呢？
 源码分析
 从ThreadLocal的set方法说起，set是用来设置想要在线程本地的数据，可以看到先拿到当前线程，然后获取当前线程的ThreadLocalMap，如果map不存在先创建map，然后设置本地变量值。
-![jdk-basis](/images/threal-set.png)
+![threal-set](/images/threal-set.png)
 那ThreadLocalMap又是什么？跟线程有什么关系？可以看到ThreadLocalMap其实是线程自身的一个成员属性threadLocals的类型。也就是线程本地数据都存在这个threadLocals应用的ThreadLocalMap中。
-![jdk-basis](/images/threal-map.png)
+![threal-map](/images/threal-map.png)
 我们再接着看看ThreadLocalMap，跟想象中的Map有点不一样，它其实内部是有个Entry数组，将数据包装成静态内部类Entry对象，存储在这个table数组中，数组的下标是threadLocal的threadLocalHashCode&(INITIAL_CAPACITY-1)，因为数组的大小是2的n次方，那其实这个值就是threadLocalHashCode%table.length，用&而不用%，其实是提升效率。只要数组的大小不变，这个索引下标是不变的，这也方便去set和get数据。
-![jdk-basis](/images/ThreadLocalMap.png)
+![ThreadLocalMap](/images/ThreadLocalMap.png)
 我们再看看Entry的定义，Entry继承自WeakReference（这么做目的是什么，后面会讲到），构造方法有两个参数一个是threadLocal对象，一个是线程本地的变量。
-![jdk-basis](/images/Entry.png)
+![Entry](/images/Entry.png)
 看到这里大家应该就明白了，每个线程自身都维护着一个ThreadLocalMap，用来存储线程本地的数据，可以简单理解成ThreadLocalMap的key是ThreadLocal变量，value是线程本地的数据。就这样很简单的实现了线程本地数据存储和交互访问。
 误区
 上文也提到了，Entry继承自WeakReference，大家都知道WeakReference（弱引用）的特性，只要从根集出发的引用中没有有效引用指向该对象，则该对象就可以被回收，这里的有效引用并不包含WeakReference，所以弱引用不影响对象被GC。
@@ -22,7 +22,7 @@ ThreadLocal又有哪些误区呢？
 所以ThreadLocalMap该做点什么？
 我看看ThreadLocalMap的expungeStaleEntry这个方法，这个方法在ThreadLocalMap get、set、remove、rehash等方法都会调用到，看下面标红的两处代码，第一处是将remove的entry赋空，第二次处是找到已经被GC的ThreadLocal，然后会清理掉table数组对entry的引用。这样entry在后续的GC中就会被回收。
 
-![jdk-basis](/images/ThreadLocalMap.png)
+![ThreadLocalMap](/images/ThreadLocalMap.png)
 是不是这样就万事大吉了呢，不用担心GC问题了呢？
 没那么简单，还是有点坑：
 这里的坑与WeakHashMap垃圾回收原理中所说的类似，如果数据初始化好之后，一直不调用get、set等方法，这样Entry就一直不能回收，导致内存泄漏。所以一旦数据不使用最好主动remove。
