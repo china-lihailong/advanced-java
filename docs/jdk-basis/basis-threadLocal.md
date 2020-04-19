@@ -22,7 +22,7 @@ ThreadLocal又有哪些误区呢？
 所以ThreadLocalMap该做点什么？
 我看看ThreadLocalMap的expungeStaleEntry这个方法，这个方法在ThreadLocalMap get、set、remove、rehash等方法都会调用到，看下面标红的两处代码，第一处是将remove的entry赋空，第二次处是找到已经被GC的ThreadLocal，然后会清理掉table数组对entry的引用。这样entry在后续的GC中就会被回收。
 
-![ThreadLocalMap](/images/ThreadLocalMap.png)
+![ThreadLocalMap](https://github.com/china-lihailong/advanced-java/blob/master/images/ThreadLocalMap.png)
 是不是这样就万事大吉了呢，不用担心GC问题了呢？
 没那么简单，还是有点坑：
 这里的坑与WeakHashMap垃圾回收原理中所说的类似，如果数据初始化好之后，一直不调用get、set等方法，这样Entry就一直不能回收，导致内存泄漏。所以一旦数据不使用最好主动remove。
