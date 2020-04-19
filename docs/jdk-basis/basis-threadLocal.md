@@ -8,7 +8,7 @@ ThreadLocal又有哪些误区呢？
 从ThreadLocal的set方法说起，set是用来设置想要在线程本地的数据，可以看到先拿到当前线程，然后获取当前线程的ThreadLocalMap，如果map不存在先创建map，然后设置本地变量值。
 ![threal-set](/images/threal-set.png)
 那ThreadLocalMap又是什么？跟线程有什么关系？可以看到ThreadLocalMap其实是线程自身的一个成员属性threadLocals的类型。也就是线程本地数据都存在这个threadLocals应用的ThreadLocalMap中。
-![threal-map](/images/threal-map.png)
+![threal-map](/images/thread-map.png)
 我们再接着看看ThreadLocalMap，跟想象中的Map有点不一样，它其实内部是有个Entry数组，将数据包装成静态内部类Entry对象，存储在这个table数组中，数组的下标是threadLocal的threadLocalHashCode&(INITIAL_CAPACITY-1)，因为数组的大小是2的n次方，那其实这个值就是threadLocalHashCode%table.length，用&而不用%，其实是提升效率。只要数组的大小不变，这个索引下标是不变的，这也方便去set和get数据。
 ![ThreadLocalMap](/images/ThreadLocalMap.png)
 我们再看看Entry的定义，Entry继承自WeakReference（这么做目的是什么，后面会讲到），构造方法有两个参数一个是threadLocal对象，一个是线程本地的变量。
